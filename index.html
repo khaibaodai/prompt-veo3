@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vũ Trọng Khải Prompt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            color: #374151;
+        }
+        .header {
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e40af;
+        }
+        .nav-links button {
+            background-color: transparent;
+            border: none;
+            padding: 0.75rem 1rem;
+            margin-left: 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            color: #6b7280;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        .nav-links button.active,
+        .nav-links button:hover {
+            background-color: #e0f2fe;
+            color: #2563eb;
+        }
+        .main-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        .content-section {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        /* Chat Specific Styles */
+        #chatPromptContent .chat-box {
+            height: 400px;
+            background-color: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        #chatPromptContent .message-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        #chatPromptContent .user-message {
+            background-color: #3b82f6;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0;
+        }
+        #chatPromptContent .ai-message {
+            background-color: #e5e7eb;
+            color: #374151;
+            align-self: flex-start;
+            border-bottom-left-radius: 0;
+        }
+        #chatPromptContent .chat-input-area {
+            display: flex;
+            gap: 0.5rem;
+        }
+        #chatPromptContent .chat-input-area textarea {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        #chatPromptContent .chat-input-area button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #chatPromptContent .chat-input-area button:hover {
+            background-color: #2563eb;
+        }
+
+        /* General form styles (from previous immersives) */
+        .input-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .input-group textarea,
+        .input-group input[type="text"],
+        .input-group select,
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 60px;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .input-group textarea:focus,
+        .input-group input[type="text"]:focus,
+        .input-group select:focus,
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+        .hint-button {
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .hint-button:hover {
+            background-color: #bfdbfe;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .message-box.show {
+            display: block;
+            opacity: 1;
+        }
+        .footer {
+            width: 100%;
+            background-color: #f0f2f5; /* Match body background */
+            padding: 1rem 0;
+            text-align: center;
+            color: #6b7280; /* Darker gray for text */
+            font-size: 0.875rem;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.03);
+            margin-top: auto; /* Push footer to the bottom */
+        }
+        .contact-info {
+            background-color: #e0f2fe;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 20px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        .contact-info h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0;
+        }
+        .contact-info p {
+            font-size: 1rem;
+            color: #374151;
+            margin-bottom: 0;
+        }
+        .contact-info .btn-zalo {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .contact-info .btn-zalo:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+        .scene-block {
+            background-color: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+        .scene-block h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 1rem;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem 0;
+        }
+        .radio-group input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            background-color: #fff;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+        }
+        .radio-group input[type="radio"]:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .radio-group input[type="radio"]:checked::before {
+            content: '';
+            display: block;
+            width: 0.5rem;
+            height: 0.5rem;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav-links {
+                margin-top: 1rem;
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .nav-links button {
+                margin: 0.25rem;
+            }
+            .content-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Vũ Trọng Khải Prompt</div>
+        <nav class="nav-links">
+            <button id="chatPromptNav" onclick="window.showSection('chatPrompt')">Chat prompt</button>
+            <button id="veo3PromptNav" onclick="window.showSection('veo3Prompt')">Tạo Prompt</button>
+            <button id="videoScriptNav" onclick="window.showSection('videoScript')">Kịch Bản Intro</button>
+            <button id="checkPromptNav" onclick="window.showSection('checkPrompt')">Check Prompt</button>
+            <button id="structuredPromptNav" onclick="window.showSection('structuredPrompt')">Cấu trúc Prompt</button>
+            <button id="randomPromptNav" onclick="window.showSection('randomPrompt')">Prompt Ngẫu nhiên</button>
+            <button id="ideaToPromptNav" onclick="window.showSection('ideaToPrompt')">Ý tưởng ra Prompt</button>
+            <button id="libraryNav" onclick="window.showSection('library')">Thư Viện</button>
+        </nav>
+    </header>
+
+    <main class="main-content-wrapper">
+        <!-- Chat Prompt Section -->
+        <section id="chatPromptContent" class="content-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Chat với Vũ Trọng Khải Prompt</h2>
+            <p class="text-gray-600 mb-6 text-center">Hỏi đáp về AI, Veo3 prompts, hoặc tải ảnh lên để được tư vấn.</p>
+
+            <div class="chat-box" id="chatBox">
+                <div class="ai-message message-bubble">
+                    Chào bạn! Tôi là Vũ Trọng Khải Prompt. Bạn có câu hỏi gì về việc viết prompt cho Veo3, hoặc các chủ đề AI khác không? Bạn cũng có thể tải ảnh lên để tôi phân tích và đưa ra gợi ý nhé!
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <textarea id="chatInput" placeholder="Nhập tin nhắn hoặc tải ảnh lên..." rows="1"></textarea>
+                <button onclick="window.sendChatMessage()">Gửi</button>
+            </div>
+        </section>
+
+        <!-- VEO3 Prompt Generator Content (Existing logic, moved) -->
+        <section id="veo3PromptContent" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Tạo prompt cho VEO3 AI</h2>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="generalContext" class="text-blue-800">Hoàn cảnh (bối cảnh) chung</label>
+                    <button type="button" class="hint-button" onclick="window.getHint('generalContext')">
+                        Gợi ý <i class="fas fa-lightbulb ml-1"></i>
+                    </button>
+                </div>
+                <textarea id="generalContext" rows="3" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ví dụ: Buổi sáng sương sớm, tại một quán cà phê nhỏ ven đường ở Hồ Chí Minh..."></textarea>
+                <div id="generalContextLoading" class="hidden text-center text-blue-600 mt-2">
+                    <div class="loading-spinner mx-auto !border-top-color: #3b82f6 !border-color: rgba(59, 130, 246, 0.3);"></div> Đang tạo gợi ý...
+                </div>
+            </div>
+
+            <div id="charactersContainer" class="mb-6">
+                <div class="character-block bg-gray-50 p-6 rounded-lg border border-gray-200 mb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-700">Nhân vật 1</h3>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="window.removeCharacter(this)">
+                            <i class="fas fa-trash-alt mr-2"></i> Xóa Nhân vật
+                        </button>
+                    </div>
+                    <div class="input-group mb-4">
+                        <label for="characterName_1">Tên nhân vật</label>
+                        <input type="text" id="characterName_1" class="character-name" placeholder="Ví dụ: ông Dũng, Cô Vân, Người kể chuyện...">
+                    </div>
+                    <div class="input-group mb-4">
+                        <label for="characterDescription_1">Mô tả nhân vật</label>
+                        <textarea id="characterDescription_1" rows="2" class="character-description" placeholder="Ví dụ: Một người phụ nữ khoảng 30 tuổi, với mái tóc nâu gợn sóng..."></textarea>
+                    </div>
+                    <div class="input-group mb-4">
+                        <label for="characterVoice_1">Giọng nói nhân vật</label>
+                        <textarea id="characterVoice_1" rows="2" class="character-voice" placeholder="Ví dụ: Giọng nói nhỏ nhẹ, trầm tư, hơi buồn bẽ nhưng đầy hy vọng..."></textarea>
+                    </div>
+                    <div class="input-group mb-4">
+                        <label for="characterAction_1">Hành Động</label>
+                        <textarea id="characterAction_1" rows="2" class="character-action" placeholder="Ví dụ: Đang ngồi đọc sách, đang đi dạo trong công viên..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="characterDialogue_1">Lời thoại</label>
+                        <textarea id="characterDialogue_1" rows="3" class="character-dialogue" placeholder="Ví dụ: Cuộc sống dù có khó khăn, nhưng mình phải cố gắng..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mb-6">
+                <button type="button" class="btn btn-secondary" onclick="window.addCharacter()">
+                    <i class="fas fa-plus-circle mr-2"></i> Thêm Nhân vật Trong Video
+                </button>
+            </div>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="generalSound" class="text-blue-800">Âm thanh chung</label>
+                    <button type="button" class="hint-button" onclick="window.getHint('generalSound')">
+                        Gợi ý <i class="fas fa-lightbulb ml-1"></i>
+                    </button>
+                </div>
+                <textarea id="generalSound" rows="3" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ví dụ: Tiếng còi xe máy cùng với tiếng rao bán hàng rong xa xa"></textarea>
+                <div id="generalSoundLoading" class="hidden text-center text-blue-600 mt-2">
+                    <div class="loading-spinner mx-auto !border-top-color: #3b82f6 !border-color: rgba(59, 130, 246, 0.3);"></div> Đang tạo gợi ý...
+                </div>
+            </div>
+
+            <div class="mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="negativePrompt" class="text-red-800">Negative Prompt</label>
+                </div>
+                <textarea id="negativePrompt" rows="3" class="w-full p-3 border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Ví dụ: low quality, blurry, bad anatomy, deformed, ugly, watermark"></textarea>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="button" class="btn btn-primary w-full max-w-md" onclick="window.generatePrompt()">
+                    <i class="fas fa-magic mr-2"></i> Tạo Video VEO3 Prompt
+                </button>
+            </div>
+
+            <div id="promptOutputContainer" class="mt-8 hidden">
+                <textarea id="generatedPrompt" rows="10" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 font-mono" readonly></textarea>
+                <button type="button" class="absolute top-3 right-3 bg-gray-200 text-gray-600 p-2 rounded-md hover:bg-gray-300 transition" onclick="window.copyToClipboard()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Video Script Generator Content (Existing logic, moved) -->
+        <section id="videoScriptContent" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Tạo kịch bản video bằng AI</h2>
+            <p class="text-gray-600 mb-6 text-center">Cùng Vũ Trọng Khải sáng tạo những điều tuyệt vời nhất trong thế giới AI</p>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="input-group mb-4">
+                    <label for="videoTopic">Chủ đề video & Nhân vật chính (Mô tả trong 1-2 câu)</label>
+                    <textarea id="videoTopic" rows="3" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ví dụ: Quảng cáo sản phẩm mới, giới thiệu sản phẩm, hướng dẫn sử dụng sản phẩm, ..... Nhân vật: Ví dụ: Baby Bi, Ông A, Bà B, ..."></textarea>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="input-group">
+                    <label for="targetAudience">Đối tượng</label> <!-- Changed label -->
+                    <select id="targetAudience" class="w-full p-3 border border-gray-300 rounded-lg">
+                        <option value="">Chọn đối tượng</option>
+                        <option value="general">Công chúng</option>
+                        <option value="teenagers">Thanh thiếu niên</option>
+                        <option value="adults">Người lớn</option>
+                        <option value="children">Trẻ em</option>
+                        <option value="marketers">Nhà tiếp thị</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="scriptLength">Độ dài</label> <!-- Changed label -->
+                    <select id="scriptLength" class="w-full p-3 border border-gray-300 rounded-lg">
+                        <option value="">Chọn độ dài</option>
+                        <option value="short">Ngắn (dưới 1 phút)</option>
+                        <option value="medium">Trung bình (1-3 phút)</option>
+                        <option value="long">Dài (trên 3 phút)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="scriptStyle">Thể loại</label> <!-- Changed label from Phong cách kịch bản to Thể loại -->
+                    <select id="scriptStyle" class="w-full p-3 border border-gray-300 rounded-lg">
+                        <option value="">Chọn thể loại</option>
+                        <option value="Cinematic">Cinematic</option>
+                        <option value="Ghibli">Ghibli</option>
+                        <option value="Simpson">Simpson</option>
+                        <option value="informative">Thông tin</option>
+                        <option value="humorous">Hài hước</option>
+                        <option value="emotional">Cảm động</option>
+                        <option value="promotional">Quảng cáo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="button" class="btn btn-primary w-full max-w-md" onclick="window.generateVideoScript()">
+                    Tạo prompt Veo3 (Tiếng anh) <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            <div id="videoScriptOutputContainer" class="mt-8 hidden">
+                <textarea id="generatedVideoScript" rows="10" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 font-mono" readonly></textarea>
+                <button type="button" class="absolute top-3 right-3 bg-gray-200 text-gray-600 p-2 rounded-md hover:bg-gray-300 transition" onclick="window.copyVideoScriptToClipboard()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Simple Prompt Generator Content (Existing logic, moved) -->
+        <section id="simplePromptContent" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Tạo prompt cơ bản</h2>
+            <p class="text-gray-600 mb-6 text-center">Nhập dữ liệu cơ bản đầu vào theo ý tưởng của bạn, việc còn lại nhận kết quả prompt</p>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="simplePromptInput" class="text-blue-800">Nhập yêu cầu của bạn</label>
+                    <button type="button" class="hint-button" onclick="window.getSimplePromptHint()">
+                        Gợi ý <i class="fas fa-lightbulb ml-1"></i>
+                    </button>
+                </div>
+                <textarea id="simplePromptInput" rows="5" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ví dụ: Viết cho tôi prompt về cảnh Người đàn ông 70 tuổi đang chăn trâu trên cánh đồng, ông vừa chăn trâu vừa hát 'Thời tiết đẹp quá con ơi' sau đó ông cười"></textarea>
+                <div id="simplePromptInputLoading" class="hidden text-center text-blue-600 mt-2">
+                    <div class="loading-spinner mx-auto !border-top-color: #3b82f6 !border-color: rgba(59, 130, 246, 0.3);"></div> Đang tạo gợi ý...
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="button" class="btn btn-primary w-full max-w-md" onclick="window.generateSimplePrompt()">
+                    Generator <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <div id="simplePromptOutputContainer" class="mt-8 hidden">
+                <textarea id="generatedSimplePrompt" rows="10" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 font-mono" readonly></textarea>
+                <button type="button" class="absolute top-3 right-3 bg-gray-200 text-gray-600 p-2 rounded-md hover:bg-gray-300 transition" onclick="window.copySimplePromptToClipboard()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Random Prompt Generator Content (Existing logic, moved) -->
+        <section id="randomPromptContent" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Gợi ý Prompt Ngẫu nhiên</h2>
+            <p class="text-gray-600 mb-6 text-center">Nhấn nút để tạo một prompt Veo3 ngẫu nhiên, khơi gợi ý tưởng mới lạ.</p>
+
+            <div class="flex justify-center mb-8">
+                <button type="button" class="btn btn-primary w-full max-w-md" onclick="window.generateRandomPrompt()">
+                    Tạo Prompt Ngẫu nhiên <i class="fas fa-dice ml-2"></i>
+                </button>
+            </div>
+
+            <div id="randomPromptOutputContainer" class="mt-8 hidden">
+                <textarea id="generatedRandomPrompt" rows="10" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 font-mono" readonly></textarea>
+                <button type="button" class="absolute top-3 right-3 bg-gray-200 text-gray-600 p-2 rounded-md hover:bg-gray-300 transition" onclick="window.copyRandomPromptToClipboard()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Structured Prompt Generator Content (Existing logic, moved) -->
+        <section id="structuredPromptContent" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Cấu trúc Prompt</h2>
+            <p class="text-gray-600 mb-6 text-center">Tạo Prompt Veo3 theo cấu trúc chi tiết người dùng nhập vào.</p>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="text-xl font-semibold text-blue-800 mb-4">Thông số Video Chung</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label for="structuredDuration">Thời lượng (giây)</label>
+                        <input type="number" id="structuredDuration" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: 8" value="8">
+                    </div>
+                    <div class="input-group">
+                        <label for="structuredResolution">Độ phân giải</label>
+                        <select id="structuredResolution" class="w-full p-3 border border-blue-300 rounded-lg">
+                            <option value="1080p">1920x1080 (1080p)</option>
+                            <option value="720p">1280x720 (720p)</option>
+                            <option value="4K">3840x2160 (4K)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="structuredAspectRatio">Tỷ lệ khung hình</label>
+                        <select id="structuredAspectRatio" class="w-full p-3 border border-blue-300 rounded-lg">
+                            <option value="16:9">16:9 (Widescreen)</option>
+                            <option value="9:16">9:16 (Vertical)</option>
+                            <option value="1:1">1:1 (Square)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="structuredStyle">Phong cách</label>
+                        <textarea id="structuredStyle" rows="2" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: Cinematic, Anime, Documentary, Cartoon"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="structuredMood">Tâm trạng</label>
+                        <textarea id="structuredMood" rows="2" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: Vui vẻ, Buồn bã, Hùng tráng, Lãng mạn"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="structuredSeed">Seed (Tùy chọn)</label>
+                        <input type="text" id="structuredSeed" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: 12345">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="text-xl font-semibold text-blue-800 mb-4">Thiết kế Âm thanh</h3>
+                <div class="input-group mb-4">
+                    <label for="structuredAudioDesign">Thiết kế âm thanh chung</label>
+                    <textarea id="structuredAudioDesign" rows="2" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: Nhạc nền nhẹ nhàng, tiếng chim hót, tiếng suối chảy"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="structuredDialogueAudio">Thuộc tính âm thanh lời thoại</label>
+                    <textarea id="structuredDialogueAudio" rows="2" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: Giọng nói rõ ràng, có độ vang nhẹ"></textarea>
+                </div>
+            </div>
+
+            <div class="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Phân cảnh</h3>
+                <div id="scenesContainer">
+                    </div>
+                <div class="flex justify-center mt-4">
+                    <button type="button" class="btn btn-secondary" onclick="window.addStructuredScene()">
+                        <i class="fas fa-plus-circle mr-2"></i> Thêm Cảnh mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="text-xl font-semibold text-blue-800 mb-4">Thông số đầu ra & Hạn chế</h3>
+                <div class="input-group mb-4">
+                    <label for="structuredOutputSpecs">Thông số đầu ra</label>
+                    <textarea id="structuredOutputSpecs" rows="2" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: Chất lượng sắc nét, chuyển động mượt mà"></textarea>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="structuredLogoText">Logo/Văn bản trên Video</label>
+                    <textarea id="structuredLogoText" rows="2" class="w-full p-3 border border-blue-300 rounded-lg" placeholder="Ví dụ: Logo Vũ Trọng Khải AI ở góc dưới bên phải, chữ 'Thành công' xuất hiện cuối video"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="structuredNegativePrompt" class="text-red-800">Negative Prompt</label>
+                    <textarea id="structuredNegativePrompt" rows="3" class="w-full p-3 border border-red-300 rounded-lg focus:ring-red-500 focus:border-red-500" placeholder="Ví dụ: low quality, blurry, bad anatomy, deformed, ugly, watermark"></textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="button" class="btn btn-primary w-full max-w-md" onclick="window.generateStructuredPrompt()">
+                    <i class="fas fa-magic mr-2"></i> Tạo Prompt Cấu trúc
+                </button>
+            </div>
+
+            <div id="structuredPromptOutputContainer" class="mt-8 hidden">
+                <textarea id="generatedStructuredPrompt" rows="10" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-100 text-gray-800 font-mono" readonly></textarea>
+                <button type="button" class="absolute top-3 right-3 bg-gray-200 text-gray-600 p-2 rounded-md hover:bg-gray-300 transition" onclick="window.copyStructuredPromptToClipboard()">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Idea to Prompt Content (Existing logic, moved) -->
+        <section id="ideaToPromptContent" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">VEO 3 Prompt Studio Pro</h2>
+            <p class="text-gray-600 mb-6 text-center">Chuyển đổi ý tưởng Tiếng Việt thành prompt VEO 3 chi tiết, với tùy chỉnh quay phim chuyên nghiệp.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <label for="vietnameseIdea" class="text-blue-800">Ý tưởng (Tiếng Việt) :</label>
+                        <button type="button" class="hint-button" onclick="window.getIdeaPromptHint()">
+                            Gợi ý <i class="fas fa-lightbulb ml-1"></i>
+                        </button>
+                    </div>
+                    <textarea id="vietnameseIdea" rows="5" class="w-full p-3 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Ví dụ: Một phi hành gia cô đơn khám phá một hành tinh lạ ..."></textarea>
+                    <div id="vietnameseIdeaLoading" class="hidden text-center text-blue-600 mt-2">
+                        <div class="loading-spinner mx-auto !border-top-color: #3b82f6 !border-color: rgba(59, 130, 246, 0.3);"></div> Đang tạo gợi ý...
+                    </div>
+                </div>
+                <div class="p-4 bg-gray-100 rounded-lg border border-gray-200">
+                    <label for="veo3PromptOutput" class="text-gray-700">Prompt VEO 3 (Tiếng Anh) :</label>
+                    <textarea id="veo3PromptOutput" rows="5" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800" readonly placeholder="Prompt được AI tạo ra sẽ xuất hiện ở đây ..."></textarea>
+                </div>
+            </div>
+
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex justify-between items-center mb-2">
+                    <label for="fixedCharacter">Cố định nhân vật (Tiếng Anh)</label>
+                    <button type="button" class="hint-button" onclick="window.getFixedCharacterHint()">
+                        Gợi ý <i class="fas fa-lightbulb ml-1"></i>
+                    </button>
+                </div>
+                <textarea id="fixedCharacter" rows="2" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: Astronaut, female, 30s, sleek silver suit"></textarea>
+                <div id="fixedCharacterLoading" class="hidden text-center text-blue-600 mt-2">
+                    <div class="loading-spinner mx-auto !border-top-color: #3b82f6 !border-color: rgba(59, 130, 246, 0.3);"></div> Đang tạo gợi ý...
+                </div>
+            </div>
+
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="text-xl font-semibold text-blue-800 mb-4">Dòng máy quay phim chuyên nghiệp</h3>
+                <p class="text-gray-700 mb-4">Chọn dòng máy quay phim để điều chỉnh chất lượng và phong cách:</p>
+                <select id="cameraModel" class="w-full p-3 border border-blue-300 rounded-lg">
+                    <option value="">Chọn dòng máy</option>
+                    <optgroup label="ARRI">
+                        <option value="ARRI ALEXA LF">ALEXA LF</option>
+                        <option value="ARRI ALEXA Mini LF">ALEXA Mini LF</option>
+                        <option value="ARRI ALEXA 65">ALEXA 65</option>
+                        <option value="ARRI ALEXA 35">ALEXA 35</option>
+                    </optgroup>
+                    <optgroup label="RED Digital Cinema">
+                        <option value="RED V-RAPTOR XL 8K VV">RED V-RAPTOR XL 8K VV</option>
+                        <option value="RED V-RAPTOR 8K VV">RED V-RAPTOR 8K VV</option>
+                        <option value="RED RANGER MONSTRO 8K VV">RED RANGER MONSTRO 8K VV</option>
+                        <option value="RED MONSTRO 8K VV">RED MONSTRO 8K VV</option>
+                        <option value="RED HELIUM 8K S35">RED HELIUM 8K S35</option>
+                        <option value="RED GEMINI 5K S35">RED GEMINI 5K S35</option>
+                    </optgroup>
+                    <optgroup label="Sony">
+                        <option value="Sony VENICE">VENICE</option>
+                        <option value="Sony VENICE 2 (6K + 8.6K)">VENICE 2 (6K + 8.6K)</option>
+                        <option value="Sony FX9">FX9</option>
+                    </optgroup>
+                    <optgroup label="Canon">
+                        <option value="Canon C300 Mark III">C300 Mark III</option>
+                        <option value="Canon C500 Mark II">C500 Mark II</option>
+                        <option value="Canon C700 FF">C700 FF</option>
+                        <option value="Canon C700 (Super 35mm Sensor)">C700 (Super 35mm Sensor)</option>
+                    </optgroup>
+                    <optgroup label="Panavision (RED-based)">
+                        <option value="Panavision Millennium DXL">Millennium DXL</option>
+                        <option value="Panavision Millennium DXL2">Millennium DXL2</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="flex justify-center mb-8">
+                <button type="button" class="btn btn-primary w-full max-w-md" onclick="window.generateIdeaToVeo3Prompt()">
+                    <i class="fas fa-magic mr-2"></i> Tạo Prompt VEO 3
+                </button>
+            </div>
+
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Tùy chỉnh Hiệu ứng Quay Phim</h3>
+
+            <div class="flex flex-col gap-6 mb-8">
+                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4">Góc Máy</h4>
+                    <p class="text-gray-700 mb-4">Chọn góc máy (ưu tiên) :</p>
+                    <div class="grid grid-cols-2 gap-2 radio-group">
+                        <label><input type="radio" name="cameraAngle" value="Eye-level"> Góc Máy Ngang Tầm Mắt (Eye-level)</label>
+                        <label><input type="radio" name="cameraAngle" value="Dutch Angle"> Góc Máy Nghiêng (Dutch Angle)</label>
+                        <label><input type="radio" name="cameraAngle" value="Wide Shot"> Toàn Cảnh (Wide Shot)</label>
+                        <label><input type="radio" name="cameraAngle" value="Extreme Wide Shot"> Siêu Toàn Cảnh (Extreme Wide Shot)</label>
+                        <label><input type="radio" name="cameraAngle" value="Long Shot"> Cảnh Xa (Long Shot)</label>
+                        <label><input type="radio" name="cameraAngle" value="Medium Shot"> Trung Cảnh (Medium Shot)</label>
+                        <label><input type="radio" name="cameraAngle" value="Medium Close-up"> Cận Trung (Medium Close-up)</label>
+                        <label><input type="radio" name="cameraAngle" value="Close-up"> Cận Cảnh (Close-up)</label>
+                        <label><input type="radio" name="cameraAngle" value="Extreme Close-up"> Đặc Tả (Extreme Close-up)</label>
+                        <label><input type="radio" name="cameraAngle" value="Over-the-Shoulder"> Qua Vai (Over-the-Shoulder)</label>
+                        <label><input type="radio" name="cameraAngle" value="Point-of-View"> Góc Nhìn Chủ Quan (Point-of-View)</label>
+                        <label><input type="radio" name="cameraAngle" value="Bird's-Eye View"> Từ Trên Cao Xuống (Bird's-Eye View)</label>
+                        <label><input type="radio" name="cameraAngle" value="Worm's-Eye View"> Từ Dưới Lên (Worm's-Eye View)</label>
+                    </div>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 class="text-lg font-semibold text-blue-800 mb-4">Di Chuyển Camera</h4>
+                    <p class="text-gray-700 mb-4">Chọn kiểu di chuyển camera (tùy chọn) :</p>
+                    <div class="grid grid-cols-2 gap-2 radio-group">
+                        <label><input type="radio" name="cameraMovement" value="Static"> Tĩnh (Static)</label>
+                        <label><input type="radio" name="cameraMovement" value="Pan"> Quay ngang (Pan)</label>
+                        <label><input type="radio" name="cameraMovement" value="Tilt"> Quay dọc (Tilt)</label>
+                        <label><input type="radio" name="cameraMovement" value="Dolly"> Di chuyển theo trục (Dolly)</label>
+                        <label><input type="radio" name="cameraMovement" value="Tracking"> Theo dõi (Tracking)</label>
+                        <label><input type="radio" name="cameraMovement" value="Zoom In"> Phóng to (Zoom In)</label>
+                        <label><input type="radio" name="cameraMovement" value="Zoom Out"> Thu nhỏ (Zoom Out)</label>
+                        <label><input type="radio" name="cameraMovement" value="Crane/Boom"> Cần cẩu (Crane/Boom)</label>
+                        <label><input type="radio" name="cameraMovement" value="Handheld"> Cầm tay (Handheld)</label>
+                        <label><input type="radio" name="cameraMovement" value="Steadicam"> Steadicam</label>
+                        <label><input type="radio" name="cameraMovement" value="Drone"> Drone</label>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="contact-info">
+        <h3>Thông tin liên hệ :</h3>
+        <p>Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ, Vũ Trọng Khải AI cung cấp VEO 3, KLing và Chatgpt giá rẻ uy tín</p>
+        <a href="https://zalo.me/g/zonaqv160" class="btn-zalo" target="_blank">Tham gia nhóm Zalo</a>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Vũ Trọng Khải Prompt. Powered by Vũ Trọng Khải AI</p>
+    </footer>
+
+    <div id="messageBox" class="message-box"></div>
+
+    <script>
+        let characterCount = 1; // For VEO3 Prompt tab
+        let sceneCount = 0; // For Structured Prompt tab
+
+        // Function to show/hide sections and update active state of nav buttons
+        window.showSection = function(sectionName) {
+            const sections = ['chatPrompt', 'veo3Prompt', 'videoScript', 'simplePrompt', 'randomPrompt', 'structuredPrompt', 'ideaToPrompt', 'checkPrompt', 'library']; // Added all section IDs
+            sections.forEach(section => {
+                const contentElement = document.getElementById(`${section}Content`);
+                if (contentElement) {
+                    contentElement.classList.add('hidden');
+                }
+                const navButton = document.getElementById(`${section}Nav`);
+                if (navButton) {
+                    navButton.classList.remove('active');
+                }
+            });
+
+            const targetContent = document.getElementById(`${sectionName}Content`);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+            }
+            const targetNavButton = document.getElementById(`${sectionName}Nav`);
+            if (targetNavButton) {
+                targetNavButton.classList.add('active');
+            }
+
+            // Special handling for structuredPrompt tab to ensure at least one scene exists
+            if (sectionName === 'structuredPrompt' && sceneCount === 0) {
+                window.addStructuredScene();
+            }
+        }
+
+        // Function to show a temporary message box
+        window.showMessage = function(message, type = 'success') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'message-box show'; // Reset classes and show
+            if (type === 'success') {
+                messageBox.style.backgroundColor = '#4CAF50';
+            } else if (type === 'error') {
+                messageBox.style.backgroundColor = '#f44336';
+            }
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- Chat Prompt Functions ---
+        window.sendChatMessage = async function() {
+            const chatInput = document.getElementById('chatInput');
+            const chatBox = document.getElementById('chatBox');
+            const userMessageText = chatInput.value.trim();
+
+            if (userMessageText === '') return;
+
+            // Add user message to chat box
+            const userBubble = document.createElement('div');
+            userBubble.className = 'user-message message-bubble';
+            userBubble.textContent = userMessageText;
+            chatBox.appendChild(userBubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            chatInput.value = ''; // Clear input
+
+            // Add loading indicator for AI response
+            const loadingBubble = document.createElement('div');
+            loadingBubble.className = 'ai-message message-bubble';
+            loadingBubble.innerHTML = '<div class="loading-spinner !w-4 !h-4 !border-white !border-t-blue-500 !mx-0"></div> Đang nghĩ...';
+            chatBox.appendChild(loadingBubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: userMessageText }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                chatBox.removeChild(loadingBubble); // Remove loading indicator
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const aiResponseText = result.candidates[0].content.parts[0].text;
+                    const aiBubble = document.createElement('div');
+                    aiBubble.className = 'ai-message message-bubble';
+                    aiBubble.textContent = aiResponseText;
+                    chatBox.appendChild(aiBubble);
+                } else {
+                    const errorBubble = document.createElement('div');
+                    errorBubble.className = 'ai-message message-bubble !bg-red-200 !text-red-800';
+                    errorBubble.textContent = 'Xin lỗi, tôi không thể tạo phản hồi lúc này.';
+                    chatBox.appendChild(errorBubble);
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                chatBox.removeChild(loadingBubble); // Remove loading indicator
+                const errorBubble = document.createElement('div');
+                errorBubble.className = 'ai-message message-bubble !bg-red-200 !text-red-800';
+                errorBubble.textContent = 'Lỗi kết nối hoặc xử lý. Vui lòng thử lại.';
+                chatBox.appendChild(errorBubble);
+                console.error('Error sending chat message:', error);
+            } finally {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+        // Allows sending message by pressing Enter
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        window.sendChatMessage();
+                    }
+                });
+            }
+        });
+
+
+        // --- VEO3 Prompt Tab Functions (Existing, with updated translation logic for action/dialogue) ---
+        window.addCharacter = function() {
+            characterCount++;
+            const charactersContainer = document.getElementById('charactersContainer');
+            const newCharacterBlock = document.createElement('div');
+            newCharacterBlock.className = 'character-block bg-gray-50 p-6 rounded-lg border border-gray-200 mb-4';
+            newCharacterBlock.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-700">Nhân vật ${characterCount}</h3>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.removeCharacter(this)">
+                        <i class="fas fa-trash-alt mr-2"></i> Xóa Nhân vật
+                    </button>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="characterName_${characterCount}">Tên nhân vật</label>
+                    <input type="text" id="characterName_${characterCount}" class="character-name" placeholder="Ví dụ: ông Dũng, Cô Vân, Người kể chuyện...">
+                </div>
+                <div class="input-group mb-4">
+                    <label for="characterDescription_${characterCount}">Mô tả nhân vật</label>
+                    <textarea id="characterDescription_${characterCount}" rows="2" class="character-description" placeholder="Ví dụ: Một người phụ nữ khoảng 30 tuổi, với mái tóc nâu gợn sóng..."></textarea>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="characterVoice_${characterCount}">Giọng nói nhân vật</label>
+                    <textarea id="characterVoice_${characterCount}" rows="2" class="character-voice" placeholder="Ví dụ: Giọng nói nhỏ nhẹ, trầm tư, hơi buồn bẽ nhưng đầy hy vọng..."></textarea>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="characterAction_${characterCount}">Hành Động</label>
+                    <textarea id="characterAction_${characterCount}" rows="2" class="character-action" placeholder="Ví dụ: Đang ngồi đọc sách, đang đi dạo trong công viên..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="characterDialogue_${characterCount}">Lời thoại</label>
+                    <textarea id="characterDialogue_${characterCount}" rows="3" class="character-dialogue" placeholder="Ví dụ: Cuộc sống dù có khó khăn, nhưng mình phải cố gắng..."></textarea>
+                </div>
+            `;
+            charactersContainer.appendChild(newCharacterBlock);
+            window.updateCharacterNumbers();
+        }
+
+        window.removeCharacter = function(button) {
+            const characterBlock = button.closest('.character-block');
+            characterBlock.remove();
+            window.updateCharacterNumbers();
+        }
+
+        window.updateCharacterNumbers = function() {
+            const characterBlocks = document.querySelectorAll('#charactersContainer .character-block');
+            characterBlocks.forEach((block, index) => {
+                block.querySelector('h3').textContent = `Nhân vật ${index + 1}`;
+                const inputs = block.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    const oldId = input.id;
+                    const newId = oldId.replace(/_\d+$/, `_${index + 1}`);
+                    input.id = newId;
+                    const label = block.querySelector(`label[for="${oldId}"]`);
+                    if (label) {
+                        label.setAttribute('for', newId);
+                    }
+                });
+            });
+            characterCount = characterBlocks.length;
+        }
+
+        window.generatePrompt = async function() {
+            const generalContext = document.getElementById('generalContext').value.trim();
+            const generalSound = document.getElementById('generalSound').value.trim();
+            const negativePrompt = document.getElementById('negativePrompt').value.trim();
+            const characterBlocks = document.querySelectorAll('#charactersContainer .character-block');
+
+            let vietnamesePrompt = "";
+
+            if (generalContext) {
+                vietnamesePrompt += `Hoàn cảnh (bối cảnh) chung: ${generalContext}\n\n`;
+            }
+
+            characterBlocks.forEach((block, index) => {
+                const name = block.querySelector('.character-name').value.trim();
+                const description = block.querySelector('.character-description').value.trim();
+                const voice = block.querySelector('.character-voice').value.trim();
+                const action = block.querySelector('.character-action').value.trim(); // Get action
+                const dialogue = block.querySelector('.character-dialogue').value.trim(); // Get dialogue
+
+                if (name || description || voice || action || dialogue) {
+                    vietnamesePrompt += `Nhân vật ${index + 1}:\n`;
+                    if (name) vietnamesePrompt += `  Tên nhân vật: ${name}\n`;
+                    if (description) vietnamesePrompt += `  Mô tả nhân vật: ${description}\n`;
+                    if (voice) vietnamesePrompt += `  Giọng nói nhân vật: ${voice}\n`;
+                    // Action is now explicitly marked for translation
+                    if (action) vietnamesePrompt += `  Hành Động (TRANSLATE_THIS_START)${action}(TRANSLATE_THIS_END)\n`;
+                    // Dialogue is kept in Vietnamese and marked for lipsync
+                    if (dialogue) vietnamesePrompt += `  Lời thoại: (DO_NOT_TRANSLATE_START)${dialogue}(Lipsync: True)(DO_NOT_TRANSLATE_END)\n`;
+                    vietnamesePrompt += "\n";
+                }
+            });
+
+            if (generalSound) {
+                vietnamesePrompt += `Âm thanh chung: ${generalSound}\n`;
+            }
+
+            if (negativePrompt) {
+                vietnamesePrompt += `Negative Prompt: ${negativePrompt}\n`;
+            }
+
+            const generatedPromptElement = document.getElementById('generatedPrompt');
+            const promptOutputContainer = document.getElementById('promptOutputContainer');
+            const generateButton = document.querySelector('#veo3PromptContent .btn-primary');
+            const originalButtonContent = generateButton.innerHTML;
+
+            if (!vietnamesePrompt) {
+                generatedPromptElement.value = '';
+                promptOutputContainer.classList.add('hidden');
+                window.showMessage('Vui lòng điền ít nhất một trường để tạo prompt.', 'error');
+                return;
+            }
+
+            generateButton.disabled = true;
+            generateButton.innerHTML = '<div class="loading-spinner mr-2"></div> Đang tạo prompt...';
+            promptOutputContainer.classList.add('hidden');
+
+            try {
+                let chatHistory = [];
+                const translationInstruction = `Translate the following video prompt into English. Ensure the output is a standard VEO3 AI video prompt structure with clear sections and consistent formatting. For sections marked (TRANSLATE_THIS_START) and (TRANSLATE_THIS_END), translate their content into English. For sections marked (DO_NOT_TRANSLATE_START) and (DO_NOT_TRANSLATE_END), keep their content in Vietnamese and include "(Lipsync: True)" if present.
+
+Here is the Vietnamese prompt:\n\n${vietnamesePrompt}`;
+                chatHistory.push({ role: "user", parts: [{ text: translationInstruction }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let translatedPrompt = result.candidates[0].content.parts[0].text;
+
+                    // Process translated text to correctly handle action and dialogue
+                    translatedPrompt = translatedPrompt.replace(/\(TRANSLATE_THIS_START\)/g, '').replace(/\(TRANSLATE_THIS_END\)/g, '');
+                    translatedPrompt = translatedPrompt.replace(/\(DO_NOT_TRANSLATE_START\)/g, '').replace(/\(DO_NOT_TRANSLATE_END\)/g, '');
+                    // Re-translate common Vietnamese labels to English
+                    translatedPrompt = translatedPrompt.replace(/Ho\u00E0n c\u1EA3nh \(b\u1ED1i c\u1EA3nh\) chung:/g, 'Context:');
+                    translatedPrompt = translatedPrompt.replace(/Nh\u00E2n v\u1EADt (\d+):/g, 'Character $1:');
+                    translatedPrompt = translatedPrompt.replace(/T\u00EAn nh\u00E2n v\u1EADt:/g, 'Name:');
+                    translatedPrompt = translatedPrompt.replace(/M\u00F4 t\u1EA3 nh\u00E2n v\u1EADt:/g, 'Description:');
+                    translatedPrompt = translatedPrompt.replace(/Gi\u1ECDng n\u00F3i nh\u00E2n v\u1EADt:/g, 'Voice:');
+                    translatedPrompt = translatedPrompt.replace(/H\u00E0nh \u0110\u1ED9ng:/g, 'Action:'); // Already translated by AI, just making sure if it missed it
+                    translatedPrompt = translatedPrompt.replace(/Lời thoại:/g, 'Dialogue:'); // Already translated by AI, just making sure if it missed it
+                    translatedPrompt = translatedPrompt.replace(/Âm thanh chung:/g, 'General Sound:');
+                    translatedPrompt = translatedPrompt.replace(/Negative Prompt:/g, 'Negative Prompt:');
+
+                    generatedPromptElement.value = translatedPrompt.trim();
+                    promptOutputContainer.classList.remove('hidden');
+                    window.showMessage('Prompt đã được tạo và dịch thành công!', 'success');
+                } else {
+                    window.showMessage('Không thể tạo prompt. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching translated prompt:', error);
+            } finally {
+                generateButton.disabled = false;
+                generateButton.innerHTML = originalButtonContent;
+            }
+        }
+
+        window.copyToClipboard = function() {
+            const generatedPromptElement = document.getElementById('generatedPrompt');
+            generatedPromptElement.select();
+            generatedPromptElement.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                window.showMessage('Đã sao chép prompt vào clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                window.showMessage('Không thể sao chép prompt.', 'error');
+            }
+        }
+
+        window.getHint = async function(fieldId) {
+            const loadingElement = document.getElementById(`${fieldId}Loading`);
+            const targetTextarea = document.getElementById(fieldId);
+            let promptText = "";
+
+            if (fieldId === 'generalContext') {
+                promptText = "Hãy đưa ra một gợi ý ngắn gọn về bối cảnh chung cho một video. Ví dụ: 'Buổi sáng sương sớm, tại một quán cà phê nhỏ ven đường ở Hồ Chí Minh...' hoặc 'Một buổi tối mưa phùn, trong căn phòng ấm cúng của một ngôi nhà cổ ở Hà Nội...'. Chỉ trả về gợi ý, không thêm bất kỳ văn bản giải thích nào.";
+            } else if (fieldId === 'generalSound') {
+                promptText = "Hãy đưa ra một gợi ý ngắn gọn về âm thanh chung cho một video. Ví dụ: 'Tiếng còi xe máy cùng với tiếng rao bán hàng rong xa xa' hoặc 'Tiếng chim hót líu lo, tiếng suối chảy róc rách, và tiếng lá cây xào xạc...'. Chỉ trả về gợi ý, không thêm bất kỳ văn bản giải thích nào.";
+            }
+
+            if (!promptText) return;
+
+            loadingElement.classList.remove('hidden');
+            targetTextarea.disabled = true;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptText }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    targetTextarea.value = text.trim();
+                } else {
+                    window.showMessage('Không thể tạo gợi ý. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching hint:', error);
+            } finally {
+                loadingElement.classList.add('hidden');
+                targetTextarea.disabled = false;
+            }
+        }
+
+        // --- Video Script Tab Functions ---
+        window.generateVideoScript = async function() {
+            const videoTopic = document.getElementById('videoTopic').value.trim();
+            const targetAudience = document.getElementById('targetAudience').value;
+            const scriptLength = document.getElementById('scriptLength').value;
+            const scriptStyle = document.getElementById('scriptStyle').value;
+
+            const generatedVideoScriptElement = document.getElementById('generatedVideoScript');
+            const videoScriptOutputContainer = document.getElementById('videoScriptOutputContainer');
+            const generateButton = document.querySelector('#videoScriptContent .btn-primary');
+            const originalButtonContent = generateButton.innerHTML;
+
+            if (!videoTopic) {
+                window.showMessage('Vui lòng nhập chủ đề video và nhân vật chính.', 'error');
+                return;
+            }
+
+            generateButton.disabled = true;
+            generateButton.innerHTML = '<div class="loading-spinner mr-2"></div> Đang tạo kịch bản...';
+            videoScriptOutputContainer.classList.add('hidden');
+
+            let promptForScript = `Create a detailed VEO3 AI video prompt in English, formatted as a script broken down into scenes, with each scene lasting approximately 8 seconds. Include scene descriptions, character actions, and dialogue. Ensure all dialogue is perfectly lipsync-ready and sounds natural in Vietnamese, and remains untranslated, clearly marked as "Dialogue: 'Lời thoại' (Lipsync: True)". Consider the following details:\n`;
+            promptForScript += `Topic & Main Characters: ${videoTopic}\n`;
+            if (targetAudience) promptForScript += `Target Audience: ${targetAudience}\n`;
+            if (scriptLength) promptForScript += `Overall Script Length: ${scriptLength}\n`;
+            if (scriptStyle) promptForScript += `Script Style: ${scriptStyle}\n`;
+            promptForScript += `Output Language: English\n\n`;
+            promptForScript += `Provide the script with clear scene divisions and estimated timings, suitable for direct input into VEO3 AI.`;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptForScript }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const scriptText = result.candidates[0].content.parts[0].text;
+                    generatedVideoScriptElement.value = scriptText.trim();
+                    videoScriptOutputContainer.classList.remove('hidden');
+                    window.showMessage('Kịch bản video đã được tạo thành công!', 'success');
+                } else {
+                    window.showMessage('Không thể tạo kịch bản video. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching video script:', error);
+            } finally {
+                generateButton.disabled = false;
+                generateButton.innerHTML = originalButtonContent;
+            }
+        }
+
+        window.copyVideoScriptToClipboard = function() {
+            const generatedVideoScriptElement = document.getElementById('generatedVideoScript');
+            generatedVideoScriptElement.select();
+            generatedVideoScriptElement.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                window.showMessage('Đã sao chép kịch bản video vào clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                window.showMessage('Không thể sao chép kịch bản video.', 'error');
+            }
+        }
+
+        // --- Simple Prompt Tab Functions ---
+        window.generateSimplePrompt = async function() {
+            const simplePromptInput = document.getElementById('simplePromptInput').value.trim();
+            const generatedSimplePromptElement = document.getElementById('generatedSimplePrompt');
+            const simplePromptOutputContainer = document.getElementById('simplePromptOutputContainer');
+            const generateButton = document.querySelector('#simplePromptContent .btn-primary');
+            const originalButtonContent = generateButton.innerHTML;
+
+            if (!simplePromptInput) {
+                generatedSimplePromptElement.value = '';
+                simplePromptOutputContainer.classList.add('hidden');
+                window.showMessage('Vui lòng nhập yêu cầu của bạn để tạo prompt.', 'error');
+                return;
+            }
+
+            generateButton.disabled = true;
+            generateButton.innerHTML = '<div class="loading-spinner mr-2"></div> Đang tạo prompt...';
+            simplePromptOutputContainer.classList.add('hidden');
+
+            try {
+                let chatHistory = [];
+                const promptInstruction = `Generate a detailed, creative, and optimized VEO3 AI video prompt in English based on the following user request. The video should be exactly 8 seconds long and have sharp quality. Format the output as a standard VEO3 prompt structure with clear sections for context, characters, and other relevant details. Ensure any dialogue provided in Vietnamese is perfectly lipsync-ready and sounds natural in Vietnamese, and remains untranslated, clearly marked as "Dialogue: 'Lời thoại' (Lipsync: True)". User request: "${simplePromptInput}"`;
+                chatHistory.push({ role: "user", parts: [{ text: promptInstruction }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    generatedSimplePromptElement.value = text.trim();
+                    simplePromptOutputContainer.classList.remove('hidden');
+                    window.showMessage('Prompt đã được tạo thành công!', 'success');
+                } else {
+                    window.showMessage('Không thể tạo prompt. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching simple prompt:', error);
+            } finally {
+                generateButton.disabled = false;
+                generateButton.innerHTML = originalButtonContent;
+            }
+        }
+
+        window.copySimplePromptToClipboard = function() {
+            const generatedSimplePromptElement = document.getElementById('generatedSimplePrompt');
+            generatedSimplePromptElement.select();
+            generatedSimplePromptElement.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                window.showMessage('Đã sao chép prompt vào clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                window.showMessage('Không thể sao chép prompt.', 'error');
+            }
+        }
+
+        window.getSimplePromptHint = async function() {
+            const loadingElement = document.getElementById('simplePromptInputLoading');
+            const targetTextarea = document.getElementById('simplePromptInput');
+            let promptText = "Hãy đưa ra một gợi ý ngắn gọn về yêu cầu tạo prompt cơ bản cho video 8 giây với chất lượng sắc nét. Ví dụ: 'Viết cho tôi prompt về cảnh Người đàn ông 70 tuổi đang chăn trâu trên cánh đồng, ông vừa chăn trâu vừa hát \"Thời tiết đẹp quá con ơi\" sau đó ông cười'. Chỉ trả về gợi ý, không thêm bất kỳ văn bản giải thích nào.";
+
+            loadingElement.classList.remove('hidden');
+            targetTextarea.disabled = true;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptText }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    targetTextarea.value = text.trim();
+                } else {
+                    window.showMessage('Không thể tạo gợi ý. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching hint:', error);
+            } finally {
+                loadingElement.classList.add('hidden');
+                targetTextarea.disabled = false;
+            }
+        }
+
+        // --- Random Prompt Tab Functions ---
+        window.generateRandomPrompt = async function() {
+            const generatedRandomPromptElement = document.getElementById('generatedRandomPrompt');
+            const randomPromptOutputContainer = document.getElementById('randomPromptOutputContainer');
+            const generateButton = document.querySelector('#randomPromptContent .btn-primary');
+            const originalButtonContent = generateButton.innerHTML;
+
+            generateButton.disabled = true;
+            generateButton.innerHTML = '<div class="loading-spinner mr-2"></div> Đang tạo prompt...';
+            randomPromptOutputContainer.classList.add('hidden');
+
+            try {
+                let chatHistory = [];
+                const promptInstruction = `Generate a creative, detailed, and unique random VEO3 AI video prompt in English, formatted with a standard VEO3 prompt structure including sections for general context, character details (name, description, voice, action), general sound, and a negative prompt. The video should be exactly 8 seconds long and have sharp quality. If any dialogue is included, ensure it is perfectly lipsync-ready and sounds natural in Vietnamese, and marked as "Dialogue: 'Lời thoại' (Lipsync: True)". Example structure: "CONTEXT:\n...CHARACTERS:\n- Character Name: ...\n  Description: ...\n  Voice: ...\n  Action: ...\n  Dialogue: 'Lời thoại' (Lipsync: True)\nAUDIO:\n...NEGATIVE PROMPT:..."`;
+                chatHistory.push({ role: "user", parts: [{ text: promptInstruction }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let generatedText = result.candidates[0].content.parts[0].text;
+
+                    generatedText = generatedText.replace(/\(DO_NOT_TRANSLATE_START\)/g, '').replace(/\(DO_NOT_TRANSLATE_END\)/g, '');
+                    generatedText = generatedText.replace(/L\u1EDLời tho\u1EA1i:/g, 'Dialogue:');
+                    generatedText = generatedText.replace(/H\u00E0nh \u0110\u1ED9ng:/g, 'Action:');
+
+                    generatedRandomPromptElement.value = generatedText.trim();
+                    randomPromptOutputContainer.classList.remove('hidden');
+                    window.showMessage('Prompt ngẫu nhiên đã được tạo thành công!', 'success');
+                } else {
+                    window.showMessage('Không thể tạo prompt ngẫu nhiên. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching random prompt:', error);
+            } finally {
+                generateButton.disabled = false;
+                generateButton.innerHTML = originalButtonContent;
+            }
+        }
+
+        window.copyRandomPromptToClipboard = function() {
+            const generatedRandomPromptElement = document.getElementById('generatedRandomPrompt');
+            generatedRandomPromptElement.select();
+            generatedRandomPromptElement.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                window.showMessage('Đã sao chép prompt ngẫu nhiên vào clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                window.showMessage('Không thể sao chép prompt.', 'error');
+            }
+        }
+
+        // --- Structured Prompt Tab Functions ---
+        window.addStructuredScene = function() {
+            sceneCount++;
+            const scenesContainer = document.getElementById('scenesContainer');
+            const newSceneBlock = document.createElement('div');
+            newSceneBlock.className = 'scene-block bg-gray-50 p-6 rounded-lg border border-gray-200 mb-4';
+            newSceneBlock.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-xl font-semibold text-gray-700">Cảnh ${sceneCount}</h4>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.removeStructuredScene(this)">
+                        <i class="fas fa-trash-alt mr-2"></i> Xóa cảnh
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="input-group">
+                        <label for="sceneStartTime_${sceneCount}">Thời gian bắt đầu (giây)</label>
+                        <input type="number" id="sceneStartTime_${sceneCount}" class="scene-start-time w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: 0" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="sceneEndTime_${sceneCount}">Thời gian kết thúc (giây)</label>
+                        <input type="number" id="sceneEndTime_${sceneCount}" class="scene-end-time w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: 8" value="8">
+                    </div>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="sceneDescription_${sceneCount}">Mô tả cảnh</label>
+                    <textarea id="sceneDescription_${sceneCount}" rows="2" class="scene-description w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: Cảnh hoàng hôn trên bãi biển, có một cặp đôi đi dạo"></textarea>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="sceneSpeaker_${sceneCount}">Người nói (Tùy chọn)</label>
+                    <input type="text" id="sceneSpeaker_${sceneCount}" class="scene-speaker w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: Cô gái, Người kể chuyện">
+                </div>
+                <div class="input-group mb-4">
+                    <label for="sceneDialogue_${sceneCount}">Lời thoại (Tiếng Việt)</label>
+                    <textarea id="sceneDialogue_${sceneCount}" rows="3" class="scene-dialogue" placeholder="Ví dụ: 'Anh yêu, hoàng hôn hôm nay đẹp quá!'"></textarea>
+                </div>
+                <div class="input-group mb-4">
+                    <label for="sceneTone_${sceneCount}">Tông giọng</label>
+                    <textarea id="sceneTone_${sceneCount}" rows="2" class="scene-tone w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: Nhẹ nhàng, trầm ấm, vui tươi"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="sceneLipSync_${sceneCount}">Yêu cầu Lip-sync</label>
+                    <textarea id="sceneLipSync_${sceneCount}" rows="1" class="scene-lipsync w-full p-3 border border-gray-300 rounded-lg" placeholder="Ví dụ: Có lip-sync"></textarea>
+                </div>
+            `;
+            scenesContainer.appendChild(newSceneBlock);
+            window.updateStructuredSceneNumbers();
+        }
+
+        window.removeStructuredScene = function(button) {
+            const sceneBlock = button.closest('.scene-block');
+            sceneBlock.remove();
+            window.updateStructuredSceneNumbers();
+        }
+
+        window.updateStructuredSceneNumbers = function() {
+            const sceneBlocks = document.querySelectorAll('#scenesContainer .scene-block');
+            sceneBlocks.forEach((block, index) => {
+                block.querySelector('h4').textContent = `Cảnh ${index + 1}`;
+                const inputs = block.querySelectorAll('input, textarea');
+                inputs.forEach(input => {
+                    const oldId = input.id;
+                    const newId = oldId.replace(/_\d+$/, `_${index + 1}`);
+                    input.id = newId;
+                    const label = block.querySelector(`label[for="${oldId}"]`);
+                    if (label) {
+                        label.setAttribute('for', newId);
+                    }
+                });
+            });
+            sceneCount = sceneBlocks.length;
+            // If all scenes are removed, add one back to ensure there's always an input
+            if (sceneCount === 0) {
+                window.addStructuredScene();
+            }
+        }
+
+        window.generateStructuredPrompt = async function() {
+            const duration = document.getElementById('structuredDuration').value.trim();
+            const resolution = document.getElementById('structuredResolution').value.trim();
+            const aspectRatio = document.getElementById('structuredAspectRatio').value.trim();
+            const style = document.getElementById('structuredStyle').value.trim();
+            const mood = document.getElementById('structuredMood').value.trim();
+            const seed = document.getElementById('structuredSeed').value.trim();
+            const audioDesign = document.getElementById('structuredAudioDesign').value.trim();
+            const dialogueAudio = document.getElementById('structuredDialogueAudio').value.trim();
+            const outputSpecs = document.getElementById('structuredOutputSpecs').value.trim();
+            const logoText = document.getElementById('structuredLogoText').value.trim();
+            const structuredNegativePrompt = document.getElementById('structuredNegativePrompt').value.trim();
+
+            const sceneBlocks = document.querySelectorAll('#scenesContainer .scene-block');
+            let vietnameseStructuredPrompt = "";
+
+            vietnameseStructuredPrompt += "Tạo Prompt Veo3 theo cấu trúc chi tiết:\n\n";
+
+            vietnameseStructuredPrompt += "VIDEO PROPERTIES:\n";
+            if (duration) vietnameseStructuredPrompt += `  Thời lượng: ${duration} giây\n`;
+            if (resolution) vietnameseStructuredPrompt += `  Độ phân giải: ${resolution}\n`;
+            if (aspectRatio) vietnameseStructuredPrompt += `  Tỷ lệ khung hình: ${aspectRatio}\n`;
+            if (style) vietnameseStructuredPrompt += `  Phong cách: ${style}\n`;
+            if (mood) vietnameseStructuredPrompt += `  Tâm trạng: ${mood}\n`;
+            if (seed) vietnameseStructuredPrompt += `  Seed: ${seed}\n`;
+            vietnameseStructuredPrompt += "\n";
+
+            vietnameseStructuredPrompt += "AUDIO DESIGN:\n";
+            if (audioDesign) vietnameseStructuredPrompt += `  Thiết kế âm thanh chung: ${audioDesign}\n`;
+            if (dialogueAudio) vietnameseStructuredPrompt += `  Thuộc tính âm thanh lời thoại: ${dialogueAudio}\n`;
+            vietnameseStructuredPrompt += "\n";
+
+            if (sceneBlocks.length > 0) {
+                vietnameseStructuredPrompt += "SCENE BREAKDOWN:\n";
+                sceneBlocks.forEach((block, index) => {
+                    const sceneStartTime = block.querySelector('.scene-start-time').value.trim();
+                    const sceneEndTime = block.querySelector('.scene-end-time').value.trim();
+                    const sceneDesc = block.querySelector('.scene-description').value.trim();
+                    const speaker = block.querySelector('.scene-speaker').value.trim();
+                    const dialogue = block.querySelector('.scene-dialogue').value.trim();
+                    const tone = block.querySelector('.scene-tone').value.trim();
+                    const lipSync = block.querySelector('.scene-lipsync').value.trim();
+
+                    if (sceneStartTime || sceneEndTime || sceneDesc || speaker || dialogue || tone || lipSync) {
+                        vietnameseStructuredPrompt += `  Cảnh ${index + 1}:\n`;
+                        if (sceneStartTime || sceneEndTime) vietnameseStructuredPrompt += `    Thời gian: từ giây ${sceneStartTime} đến giây ${sceneEndTime}\n`;
+                        if (sceneDesc) vietnameseStructuredPrompt += `    Mô tả cảnh: ${sceneDesc}\n`;
+                        if (speaker) vietnameseStructuredPrompt += `    Người nói: ${speaker}\n`;
+                        // Dialogue is kept in Vietnamese and marked for lipsync
+                        if (dialogue) vietnameseStructuredPrompt += `    Lời thoại: (DO_NOT_TRANSLATE_START)${dialogue}(Lipsync: True)(DO_NOT_TRANSLATE_END)\n`;
+                        if (tone) vietnameseStructuredPrompt += `    Tông giọng: ${tone}\n`;
+                        if (lipSync) vietnameseStructuredPrompt += `    Yêu cầu Lip-sync: ${lipSync}\n`;
+                        vietnameseStructuredPrompt += "\n";
+                    }
+                });
+            }
+
+            vietnameseStructuredPrompt += "OUTPUT SPECIFICATIONS & RESTRICTIONS:\n";
+            if (outputSpecs) vietnameseStructuredPrompt += `  Thông số đầu ra: ${outputSpecs}\n`;
+            if (logoText) vietnameseStructuredPrompt += `  Logo/Văn bản trên Video: ${logoText}\n`;
+            if (structuredNegativePrompt) {
+                vietnameseStructuredPrompt += `  Negative Prompt: ${structuredNegativePrompt}\n`;
+            }
+            vietnameseStructuredPrompt += "\n";
+
+
+            const generatedStructuredPromptElement = document.getElementById('generatedStructuredPrompt');
+            const structuredPromptOutputContainer = document.getElementById('structuredPromptOutputContainer');
+            const generateButton = document.querySelector('#structuredPromptContent .btn-primary');
+            const originalButtonContent = generateButton.innerHTML;
+
+            if (!vietnameseStructuredPrompt) {
+                generatedStructuredPromptElement.value = '';
+                structuredPromptOutputContainer.classList.add('hidden');
+                window.showMessage('Vui lòng điền ít nhất một trường để tạo prompt.', 'error');
+                return;
+            }
+
+            generateButton.disabled = true;
+            generateButton.innerHTML = '<div class="loading-spinner mr-2"></div> Đang tạo prompt...';
+            structuredPromptOutputContainer.classList.add('hidden');
+
+            try {
+                let chatHistory = [];
+                const translationInstruction = `Translate the following structured video prompt into English. Ensure the output is a standard VEO3 AI video prompt structure with clear sections and consistent formatting. For any dialogue, ensure it is perfectly lipsync-ready and sounds natural in Vietnamese. Do NOT translate any text enclosed within (DO_NOT_TRANSLATE_START) and (DO_NOT_TRANSLATE_END) markers, and keep those markers in the final output. Here is the Vietnamese structured prompt:\n\n${vietnameseStructuredPrompt}`;
+                chatHistory.push({ role: "user", parts: [{ text: translationInstruction }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let translatedPrompt = result.candidates[0].content.parts[0].text;
+
+                    // Remove DO_NOT_TRANSLATE_START/END markers, but keep (Lipsync: True) and ensure labels are translated
+                    translatedPrompt = translatedPrompt.replace(/\(DO_NOT_TRANSLATE_START\)/g, '').replace(/\(DO_NOT_TRANSLATE_END\)/g, '');
+                    translatedPrompt = translatedPrompt.replace(/Thời lượng:/g, 'Duration:');
+                    translatedPrompt = translatedPrompt.replace(/Độ phân giải:/g, 'Resolution:');
+                    translatedPrompt = translatedPrompt.replace(/Tỷ lệ khung hình:/g, 'Aspect Ratio:');
+                    translatedPrompt = translatedPrompt.replace(/Phong cách:/g, 'Style:');
+                    translatedPrompt = translatedPrompt.replace(/Tâm trạng:/g, 'Mood:');
+                    translatedPrompt = translatedPrompt.replace(/Thiết kế âm thanh chung:/g, 'Overall Audio Design:');
+                    translatedPrompt = translatedPrompt.replace(/Thuộc tính âm thanh lời thoại:/g, 'Dialogue Audio Properties:');
+                    translatedPrompt = translatedPrompt.replace(/Mô tả cảnh:/g, 'Scene Description:');
+                    translatedPrompt = translatedPrompt.replace(/Người nói:/g, 'Speaker:');
+                    translatedPrompt = translatedPrompt.replace(/Lời thoại:/g, 'Dialogue:');
+                    translatedPrompt = translatedPrompt.replace(/Tông giọng:/g, 'Tone:');
+                    translatedPrompt = translatedPrompt.replace(/Yêu cầu Lip-sync:/g, 'Lip-sync Requirement:');
+                    translatedPrompt = translatedPrompt.replace(/Thông số đầu ra:/g, 'Output Specifications:');
+                    translatedPrompt = translatedPrompt.replace(/Logo\/Văn bản trên Video:/g, 'Logo/Text on Video:');
+                    translatedPrompt = translatedPrompt.replace(/Cảnh (\d+):/g, 'Scene $1:'); // Translate "Cảnh X" to "Scene X"
+                    translatedPrompt = translatedPrompt.replace(/Thời gian: từ giây (\d+) đến giây (\d+)/g, 'Time: from second $1 to second $2'); // Translate "Thời gian" label
+                    translatedPrompt = translatedPrompt.replace(/Negative Prompt:/g, 'Negative Prompt:'); // Ensure negative prompt label is consistent
+
+
+                    generatedStructuredPromptElement.value = translatedPrompt.trim();
+                    structuredPromptOutputContainer.classList.remove('hidden');
+                    window.showMessage('Prompt đã được tạo và dịch thành công!', 'success');
+                } else {
+                    window.showMessage('Không thể tạo prompt. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching translated prompt:', error);
+            } finally {
+                generateButton.disabled = false;
+                generateButton.innerHTML = originalButtonContent;
+            }
+        }
+
+        window.copyStructuredPromptToClipboard = function() {
+            const generatedStructuredPromptElement = document.getElementById('generatedStructuredPrompt');
+            generatedStructuredPromptElement.select();
+            generatedStructuredPromptElement.setSelectionRange(0, 99999);
+
+            try {
+                document.execCommand('copy');
+                window.showMessage('Đã sao chép prompt vào clipboard!', 'success');
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                window.showMessage('Không thể sao chép prompt.', 'error');
+            }
+        }
+
+
+        // --- Idea to Prompt Tab Functions ---
+        window.generateIdeaToVeo3Prompt = async function() {
+            const vietnameseIdea = document.getElementById('vietnameseIdea').value.trim();
+            const fixedCharacter = document.getElementById('fixedCharacter').value.trim();
+            const cameraModel = document.getElementById('cameraModel').value.trim(); // Get selected camera model
+            const cameraAngle = document.querySelector('input[name="cameraAngle"]:checked')?.value || '';
+            const cameraMovement = document.querySelector('input[name="cameraMovement"]:checked')?.value || '';
+
+            const veo3PromptOutputElement = document.getElementById('veo3PromptOutput');
+            const generateButton = document.querySelector('#ideaToPromptContent .btn-primary');
+            const originalButtonContent = generateButton.innerHTML;
+
+            if (!vietnameseIdea) {
+                veo3PromptOutputElement.value = '';
+                window.showMessage('Vui lòng nhập ý tưởng tiếng Việt của bạn.', 'error');
+                return;
+            }
+
+            generateButton.disabled = true;
+            generateButton.innerHTML = '<div class="loading-spinner mr-2"></div> Đang tạo prompt...';
+            veo3PromptOutputElement.value = 'Đang tạo prompt...';
+
+            // Modified prompt instruction to explicitly ask for VEO3 AI video prompt format, lipsync, and natural Vietnamese dialogue
+            let promptInstruction = `Generate a detailed VEO3 AI video prompt in English based on the following Vietnamese idea. The video should be exactly 8 seconds long and have sharp quality. For any dialogue, ensure it is perfectly lipsync-ready and sounds natural in Vietnamese, and remains untranslated, clearly marked as "Dialogue: 'Lời thoại' (Lipsync: True)". Incorporate the fixed character, camera model, camera angle, and camera movement if provided. Format the output as a standard VEO3 prompt structure with clear sections and consistent formatting.
+
+Vietnamese Idea: "${vietnameseIdea}"`;
+
+            if (fixedCharacter) {
+                promptInstruction += `\nFixed Character (English): "${fixedCharacter}"`;
+            }
+            if (cameraModel) {
+                promptInstruction += `\nShot with: ${cameraModel}`; // Include camera model
+            }
+            if (cameraAngle) {
+                promptInstruction += `\nCamera Angle: "${cameraAngle}"`;
+            }
+            if (cameraMovement) {
+                promptInstruction += `\nCamera Movement: "${cameraMovement}"`;
+            }
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptInstruction }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const generatedText = result.candidates[0].content.parts[0].text;
+                    veo3PromptOutputElement.value = generatedText.trim();
+                    window.showMessage('Prompt đã được tạo thành công!', 'success');
+                } else {
+                    window.showMessage('Không thể tạo prompt. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching idea prompt:', error);
+            } finally {
+                generateButton.disabled = false;
+                generateButton.innerHTML = originalButtonContent;
+            }
+        }
+
+        window.getIdeaPromptHint = async function() {
+            const loadingElement = document.getElementById('vietnameseIdeaLoading');
+            const targetTextarea = document.getElementById('vietnameseIdea');
+            let promptText = "Hãy đưa ra một gợi ý ngắn gọn về ý tưởng video bằng tiếng Việt. Ví dụ: 'Một phi hành gia cô đơn khám phá một hành tinh lạ, anh ta tìm thấy một bông hoa phát sáng và ngạc nhiên.' Chỉ trả về gợi ý, không thêm bất kỳ văn bản giải thích nào.";
+
+            loadingElement.classList.remove('hidden');
+            targetTextarea.disabled = true;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: promptText }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    targetTextarea.value = text.trim();
+                } else {
+                    window.showMessage('Không thể tạo gợi ý. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching hint:', error);
+            } finally {
+                loadingElement.classList.add('hidden');
+                targetTextarea.disabled = false;
+            }
+        }
+
+        window.getFixedCharacterHint = async function() {
+            const vietnameseIdea = document.getElementById('vietnameseIdea').value.trim();
+            const loadingElement = document.getElementById('fixedCharacterLoading');
+            const targetInput = document.getElementById('fixedCharacter');
+
+            if (!vietnameseIdea) {
+                window.showMessage('Vui lòng nhập "Ý tưởng (Tiếng Việt)" trước để nhận gợi ý nhân vật.', 'error');
+                return;
+            }
+
+            loadingElement.classList.remove('hidden');
+            targetInput.disabled = true;
+
+            try {
+                let chatHistory = [];
+                const promptText = `Based on the following Vietnamese video idea, suggest a concise fixed character description in English, suitable for an AI video generator. Focus on key visual traits. Example: "Astronaut, female, 30s, sleek silver suit". Only return the character description, no extra text.
+
+Vietnamese Idea: "${vietnameseIdea}"`;
+                chatHistory.push({ role: "user", parts: [{ text: promptText }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    targetInput.value = text.trim();
+                } else {
+                    window.showMessage('Không thể tạo gợi ý nhân vật. Vui lòng thử lại.', 'error');
+                    console.error('API response structure unexpected:', result);
+                }
+            } catch (error) {
+                window.showMessage('Lỗi khi gọi API: ' + error.message, 'error');
+                console.error('Error fetching fixed character hint:', error);
+            } finally {
+                loadingElement.classList.add('hidden');
+                targetInput.disabled = false;
+            }
+        }
+
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            window.updateCharacterNumbers(); // For VEO3 Prompt tab
+            window.addStructuredScene(); // Add initial scene for Structured Prompt tab (only if structuredPrompt is the default tab or accessed first)
+            // To make sure structuredPrompt is shown initially if it's the target tab after load
+            if (window.location.hash === '#structuredPrompt') {
+                window.showSection('structuredPrompt');
+            } else if (window.location.hash === '#ideaToPrompt') {
+                window.showSection('ideaToPrompt');
+            }
+            else {
+                window.showSection('chatPrompt'); // Default to Chat Prompt based on new UI
+            }
+        });
+    </script>
+</body>
+</html>
